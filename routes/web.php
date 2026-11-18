@@ -25,4 +25,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/{conversation}/messages', [ChatController::class, 'send'])
         ->name('chat.messages.store');
+    Route::post('/chat/{conversation}/read', [ChatController::class, 'markRead'])
+        ->name('chat.read.store');
 });

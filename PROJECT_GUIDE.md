@@ -77,8 +77,9 @@ npm run build
 2. To test a conversation, register a second account in another browser profile or private window. The people list excludes the currently signed-in account.
 3. Select a person from the people list. The app creates a direct conversation or reuses the existing one, then opens it.
 4. Write a message and press Enter to send. Use Shift+Enter to add a line break. Messages can contain up to 5,000 characters.
-5. Keep the conversation open in both browser sessions to see new messages arrive without refreshing. The chat also shows the Reverb connection state and a temporary typing indicator.
-6. Use **Sign out** to end the current session.
+5. Keep the conversation open in both browser sessions to see new messages arrive without refreshing. The chat also shows the Reverb connection state, a temporary typing indicator, and blue double-check marks when the other participant has read your message.
+6. Use the sun/moon button to switch between light and dark appearance. Your choice is saved in this browser; before you choose, the app follows your operating-system preference.
+7. Use **Sign out** to end the current session.
 
 ## 6. How a conversation works
 
@@ -88,7 +89,8 @@ npm run build
 4. When a participant sends a message, the server validates it, saves it, and updates the conversation timestamp in a database transaction.
 5. The server immediately broadcasts a `MessageSent` event on the private conversation channel. A queue worker is not needed for this event.
 6. Inertia's live-prop integration updates the page's message list without a full reload. The chat scrolls to the latest message.
-7. Typing indicators use temporary Echo client whispers. They are not stored as messages in the database.
+7. When the conversation is open in a visible tab, the recipient marks incoming messages as read. The server saves a `read_at` timestamp and broadcasts a `MessagesRead` event so the sender's ticks turn blue in real time.
+8. Typing indicators use temporary Echo client whispers. They are not stored as messages in the database.
 
 ## 7. Privacy and access control
 
@@ -104,7 +106,7 @@ npm run build
 - `app/Http/Controllers/ChatController.php` - conversation listing, access checks, message history, and message sending.
 - `app/Models/Conversation.php`, `app/Models/Message.php`, and `app/Models/User.php` - Eloquent models and relationships.
 - `database/migrations/` - user, conversation, and message table definitions.
-- `app/Events/MessageSent.php` and `routes/channels.php` - real-time message event and private channel authorization.
+- `app/Events/MessageSent.php`, `app/Events/MessagesRead.php`, and `routes/channels.php` - real-time message and read-receipt events, plus private channel authorization.
 - `resources/js/Pages/Auth/` and `resources/js/Pages/Chat/` - Vue pages for authentication, conversation list, and messaging.
 - `resources/js/echo.js` and `resources/js/app.js` - Echo/Reverb and Inertia Vue setup.
 - `tests/Feature/ChatTest.php` - feature coverage for account flows, private conversations, message delivery, and access control.
@@ -117,4 +119,4 @@ Run the Laravel test suite with:
 php artisan test
 ```
 
-The chat feature tests cover registration and login, creating and reusing a conversation, saving and broadcasting messages, live message props, and participant-only access.
+The chat feature tests cover registration and login, creating and reusing a conversation, saving and broadcasting messages, read receipts, live message props, and participant-only access.

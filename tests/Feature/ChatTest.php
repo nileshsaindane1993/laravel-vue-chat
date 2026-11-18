@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Events\MessageSent;
+use App\Events\MessagesRead;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
@@ -111,11 +112,95 @@ class ChatTest extends TestCase
                         'id' => $message->id,
                         'body' => 'Hello there',
                         'created_at' => $message->created_at->toIso8601String(),
+                        'read_at' => null,
                         'sender' => ['id' => $sender->id, 'name' => 'Alex'],
                     ]],
                 ],
             ],
         ], $payload);
+    }
+
+    public function test_a_recipient_reading_a_conversation_marks_incoming_messages_as_seen(): void
+    {
+        $sender = User::factory()->create();
+        $recipient = User::factory()->create();
+        $conversation = Conversation::create([
+            'user_one_id' => min($sender->id, $recipient->id),
+            'user_two_id' => max($sender->id, $recipient->id),
+        ]);
+        $incomingMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'sender_id' => $sender->id,
+            'body' => 'Please review this',
+        ]);
+        $outgoingMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'sender_id' => $recipient->id,
+            'body' => 'I will',
+        ]);
+        Event::fake([MessagesRead::class]);
+
+        $this->actingAs($recipient)
+            ->post("/chat/{$conversation->id}/read")
+            ->assertRedirect("/chat/{$conversation->id}");
+
+        $this->assertNotNull($incomingMessage->fresh()->read_at);
+        $this->assertNull($outgoingMessage->fresh()->read_at);
+
+        $readAt = $incomingMessage->fresh()->read_at->toIso8601String();
+        Event::assertDispatched(MessagesRead::class, fn (MessagesRead $event): bool => (
+            $event->conversationId === $conversation->id
+            && $event->messageIds === [$incomingMessage->id]
+            && $event->readAt === $readAt
+            && $event->broadcastWith() === [
+                'message_ids' => [$incomingMessage->id],
+                'read_at' => $readAt,
+            ]
+        ));
+    }
+
+    public function test_a_non_participant_cannot_mark_conversation_messages_as_seen(): void
+    {
+        $participant = User::factory()->create();
+        $otherParticipant = User::factory()->create();
+        $outsider = User::factory()->create();
+        $conversation = Conversation::create([
+            'user_one_id' => min($participant->id, $otherParticipant->id),
+            'user_two_id' => max($participant->id, $otherParticipant->id),
+        ]);
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'sender_id' => $participant->id,
+            'body' => 'Private message',
+        ]);
+
+        $this->actingAs($outsider)
+            ->post("/chat/{$conversation->id}/read")
+            ->assertForbidden();
+
+        $this->assertNull($message->fresh()->read_at);
+    }
+
+    public function test_reading_a_conversation_without_unread_messages_does_not_broadcast_a_receipt(): void
+    {
+        $recipient = User::factory()->create();
+        $sender = User::factory()->create();
+        $conversation = Conversation::create([
+            'user_one_id' => min($recipient->id, $sender->id),
+            'user_two_id' => max($recipient->id, $sender->id),
+        ]);
+        Message::create([
+            'conversation_id' => $conversation->id,
+            'sender_id' => $recipient->id,
+            'body' => 'Already mine',
+        ]);
+        Event::fake([MessagesRead::class]);
+
+        $this->actingAs($recipient)
+            ->post("/chat/{$conversation->id}/read")
+            ->assertRedirect("/chat/{$conversation->id}");
+
+        Event::assertNotDispatched(MessagesRead::class);
     }
 
     public function test_message_props_are_live_on_the_private_conversation_channel(): void

@@ -35,6 +35,7 @@ class MessageSent implements ShouldBroadcastNow
                 'id' => $message->id,
                 'body' => $message->body,
                 'created_at' => $message->created_at->toIso8601String(),
+                'read_at' => $message->read_at?->toIso8601String(),
                 'sender' => $message->sender->only(['id', 'name']),
             ])
             ->all();

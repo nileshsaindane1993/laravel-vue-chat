@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
+use App\Events\MessagesRead;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
@@ -102,8 +103,45 @@ class ChatController extends Controller
         return redirect()->route('chat.show', $conversation);
     }
 
+    public function markRead(Request $request, Conversation $conversation): RedirectResponse
+    {
+        $this->authorizeParticipant($request, $conversation);
+
+        $readerId = $request->user()->id;
+        $readAt = now();
+
+        $messageIds = DB::transaction(function () use ($conversation, $readerId, $readAt): array {
+            $messageIds = $conversation->messages()
+                ->where('sender_id', '!=', $readerId)
+                ->whereNull('read_at')
+                ->lockForUpdate()
+                ->pluck('id')
+                ->map(fn (mixed $messageId): int => (int) $messageId)
+                ->all();
+
+            if ($messageIds !== []) {
+                $conversation->messages()
+                    ->whereKey($messageIds)
+                    ->whereNull('read_at')
+                    ->update(['read_at' => $readAt]);
+            }
+
+            return $messageIds;
+        });
+
+        if ($messageIds !== []) {
+            broadcast(new MessagesRead(
+                $conversation->id,
+                $messageIds,
+                $readAt->toIso8601String(),
+            ));
+        }
+
+        return redirect()->route('chat.show', $conversation);
+    }
+
     /**
-     * @return array<int, array{id: int, body: string, created_at: string, sender: array{id: int, name: string}}>
+     * @return array<int, array{id: int, body: string, created_at: string, read_at: ?string, sender: array{id: int, name: string}}>
      */
     private function messagesFor(Conversation $conversation): array
     {
@@ -118,6 +156,7 @@ class ChatController extends Controller
                 'id' => $message->id,
                 'body' => $message->body,
                 'created_at' => $message->created_at->toIso8601String(),
+                'read_at' => $message->read_at?->toIso8601String(),
                 'sender' => $message->sender->only(['id', 'name']),
             ])
             ->all();
