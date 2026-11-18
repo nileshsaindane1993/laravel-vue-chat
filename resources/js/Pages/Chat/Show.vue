@@ -188,7 +188,7 @@ onUnmounted(() => {
                         </p>
                     </div>
                 </div>
-                <button class="shrink-0 rounded-xl px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" @click="logout">
+                <button class="shrink-0 cursor-pointer rounded-xl px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" @click="logout">
                     Sign out
                 </button>
             </header>

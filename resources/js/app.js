@@ -6,7 +6,7 @@ import { createApp, h } from 'vue';
 const pages = import.meta.glob('./Pages/**/*.vue', { eager: true });
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - Chat` : 'Chat'),
+    title: (title) => (title ? `${title}` : ' Laravel Vue Chat'),
     resolve: (name) => {
         const page = pages[`./Pages/${name}.vue`];
 

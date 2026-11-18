@@ -1,6 +1,8 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel Vue Chat';
+
 const form = useForm({
     name: '',
     email: '',
@@ -14,7 +16,7 @@ function submit() {
 </script>
 
 <template>
-    <Head title="Create account" />
+    <Head :title="appName" />
 
     <main class="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-12">
         <section class="w-full max-w-md rounded-3xl bg-white p-8 shadow-xl shadow-slate-200/60">
@@ -29,6 +31,7 @@ function submit() {
                         v-model="form.name"
                         type="text"
                         autocomplete="name"
+                        placeholder="Enter Name"
                         required
                         class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
                     >
@@ -41,6 +44,7 @@ function submit() {
                         v-model="form.email"
                         type="email"
                         autocomplete="email"
+                        placeholder="Enter Email"
                         required
                         class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
                     >
@@ -53,6 +57,7 @@ function submit() {
                         v-model="form.password"
                         type="password"
                         autocomplete="new-password"
+                        placeholder="Enter Password"
                         required
                         class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
                     >
@@ -60,11 +65,12 @@ function submit() {
                 </label>
 
                 <label class="block text-sm font-medium text-slate-700">
-                    Confirm password
+                    Confirm Password
                     <input
                         v-model="form.password_confirmation"
                         type="password"
                         autocomplete="new-password"
+                        placeholder="Confirm Password"
                         required
                         class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
                     >
@@ -73,7 +79,7 @@ function submit() {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="w-full rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+                    class="w-full cursor-pointer rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60"
                 >
                     {{ form.processing ? 'Creating account…' : 'Create account' }}
                 </button>

@@ -1,6 +1,8 @@
 <script setup>
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel Vue Chat';
+
 defineProps({
     users: { type: Array, required: true },
     conversations: { type: Array, required: true },
@@ -18,7 +20,7 @@ function logout() {
 </script>
 
 <template>
-    <Head title="Messages" />
+    <Head :title="appName + ' | Messages'" />
 
     <main class="min-h-screen bg-slate-100 px-4 py-8 sm:px-6">
         <div class="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl overflow-hidden rounded-3xl bg-white shadow-xl shadow-slate-200/70 md:grid-cols-[340px_1fr]">
@@ -28,7 +30,7 @@ function logout() {
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600">Connect</p>
                         <h1 class="mt-1 text-2xl font-semibold text-slate-900">Messages</h1>
                     </div>
-                    <button class="text-sm font-medium text-slate-500 hover:text-slate-900" @click="logout">Sign out</button>
+                    <button class="text-sm cursor-pointer font-medium text-slate-500 hover:text-slate-900" @click="logout">Sign out</button>
                 </header>
 
                 <div class="mt-8">
@@ -55,7 +57,7 @@ function logout() {
                         <button
                             v-for="user in users"
                             :key="user.id"
-                            class="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-indigo-50"
+                            class="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-indigo-50"
                             @click="startConversation(user.id)"
                         >
                             <span class="flex size-10 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-700">
