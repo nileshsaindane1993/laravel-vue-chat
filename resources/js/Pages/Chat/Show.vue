@@ -307,7 +307,7 @@ onUnmounted(() => {
                                 <span
                                     v-if="message.sender.id === currentUser.id"
                                     class="inline-flex"
-                                    :class="isMessageSeen(message) ? 'text-sky-300' : 'text-white/70'"
+                                    :class="isMessageSeen(message) ? 'text-sky-600 dark:text-sky-300' : 'text-slate-500 dark:text-white/70'"
                                     :aria-label="isMessageSeen(message) ? 'Seen' : 'Sent'"
                                     :title="isMessageSeen(message) ? 'Seen' : 'Sent'"
                                 >
@@ -361,7 +361,7 @@ onUnmounted(() => {
                             type="submit"
                             :disabled="form.processing || !form.body.trim()"
                             aria-label="Send message"
-                            class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
+                            class="flex cursor-pointer size-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="size-5" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 14-7-4.5 14-2.5-6.5L5 12Z" />
